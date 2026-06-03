@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Store_Estudo-IA — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════
+   TOKENS — NEON GREEN + PURPLE DARK
+══════════════════════════════════════════════════ */
+:root{
+  --bg:      #09090f;
+  --bg2:     #0e0e18;
+  --card:    #111120;
+  --card2:   #181828;
+  --border:  rgba(255,255,255,0.055);
+  --borderH: rgba(0,255,136,0.3);
+
+  --text:    #eeeef8;
+  --muted:   #50507a;
+  --dim:     #8080b0;
+
+  /* NEON palette */
+  --ngreen:  #00ff88;
+  --ngreen2: #00cc66;
+  --npurple: #bf00ff;
+  --npurple2:#9900cc;
+  --nblue:   #00aaff;
+  --ncyan:   #00ffee;
+  --norange: #ff8c00;
+  --nred:    #ff3366;
+  --nyellow: #ffe600;
+
+  /* Gradients */
+  --gg: linear-gradient(135deg,#00ff88,#00cc66);
+  --gp: linear-gradient(135deg,#bf00ff,#7700cc);
+  --gb: linear-gradient(135deg,#00aaff,#0066cc);
+  --gc: linear-gradient(135deg,#00ffee,#00aaaa);
+  --go: linear-gradient(135deg,#ff8c00,#cc5500);
+  --gr: linear-gradient(135deg,#ff3366,#cc0033);
+
+  --radius: 14px;
+  --font: 'Inter',-apple-system,sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+
+/* ══════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════ */
+.hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#0d0d1c 0%,var(--bg) 100%);
+  border-bottom:1px solid var(--border);
+  padding:26px 36px 22px;
+}
+.hero::before{
+  content:'';position:absolute;top:-100px;left:-60px;
+  width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,255,136,.08) 0%,transparent 65%);
+  animation:glowPulse 7s ease-in-out infinite;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-80px;right:-40px;
+  width:380px;height:380px;border-radius:50%;
+  background:radial-gradient(circle,rgba(191,0,255,.07) 0%,transparent 65%);
+  animation:glowPulse 7s ease-in-out infinite reverse;
+}
+@keyframes glowPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.25);opacity:1}}
+
+.hero-inner{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.22);
+  padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;
+  color:var(--ngreen);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;
+}
+.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ngreen);box-shadow:0 0 10px var(--ngreen);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+.hero-title{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1}
+.hero-title .t1{
+  background:linear-gradient(135deg,#00ff88 0%,#00ccff 60%,#bf00ff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{font-size:13px;color:var(--muted);margin-top:7px}
+.hero-sub strong{color:var(--dim)}
+
+/* filter pills */
+.pill-group{display:flex;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:4px}
+.pill{
+  padding:6px 18px;border-radius:7px;border:none;cursor:pointer;
+  font-family:var(--font);font-size:12px;font-weight:600;
+  color:var(--muted);background:transparent;transition:all .2s;
+}
+.pill:hover{color:var(--text)}
+.pill.active{
+  background:linear-gradient(135deg,var(--ngreen2),#007744);
+  color:#000;box-shadow:0 2px 14px rgba(0,255,136,.35);
+}
+
+/* cat-filter banner */
+#catBanner{
+  display:none;margin:16px 36px 0;
+  padding:10px 18px;border-radius:10px;
+  background:rgba(191,0,255,.1);border:1px solid rgba(191,0,255,.3);
+  color:#e0a0ff;font-size:13px;font-weight:600;
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+}
+#catBanner.show{display:flex}
+.btn-clear{
+  background:rgba(191,0,255,.2);border:1px solid rgba(191,0,255,.4);
+  color:#e0a0ff;padding:5px 14px;border-radius:7px;
+  font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;
+  transition:all .2s;
+}
+.btn-clear:hover{background:rgba(191,0,255,.4)}
+
+/* ══════════════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════════════ */
+.main{padding:24px 36px 56px;max-width:1700px;margin:0 auto}
+
+.sec-lbl{
+  font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;margin-top:28px;
+  display:flex;align-items:center;gap:10px;
+}
+.sec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(0,255,136,.15),transparent)}
+
+/* ══════════════════════════════════════════════════
+   KPI CARDS — NEON GLOW
+══════════════════════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+
+.kpi-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  cursor:default;
+  transition:all .3s ease;
+  position:relative;overflow:hidden;
+}
+/* neon top line always visible */
+.kpi-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+/* inner bottom glow */
+.kpi-card::after{
+  content:'';position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+  width:60%;height:40px;border-radius:50%;
+  filter:blur(18px);opacity:.45;transition:opacity .3s;
+}
+.kpi-card:hover{
+  background:var(--card2);transform:translateY(-4px);
+}
+.kpi-card:hover::after{opacity:.8}
+
+/* per-card color theming */
+.k-g::before{background:var(--gg)} .k-g::after{background:var(--ngreen)}
+.k-p::before{background:var(--gp)} .k-p::after{background:var(--npurple)}
+.k-b::before{background:var(--gb)} .k-b::after{background:var(--nblue)}
+.k-c::before{background:var(--gc)} .k-c::after{background:var(--ncyan)}
+.k-o::before{background:var(--go)} .k-o::after{background:var(--norange)}
+.k-r::before{background:var(--gr)} .k-r::after{background:var(--nred)}
+
+.kpi-card:hover.k-g{border-color:rgba(0,255,136,.3);box-shadow:0 8px 36px rgba(0,255,136,.12),inset 0 0 24px rgba(0,255,136,.03)}
+.kpi-card:hover.k-p{border-color:rgba(191,0,255,.3);box-shadow:0 8px 36px rgba(191,0,255,.12),inset 0 0 24px rgba(191,0,255,.03)}
+.kpi-card:hover.k-b{border-color:rgba(0,170,255,.3);box-shadow:0 8px 36px rgba(0,170,255,.12)}
+.kpi-card:hover.k-c{border-color:rgba(0,255,238,.3);box-shadow:0 8px 36px rgba(0,255,238,.12)}
+.kpi-card:hover.k-o{border-color:rgba(255,140,0,.3); box-shadow:0 8px 36px rgba(255,140,0,.12)}
+.kpi-card:hover.k-r{border-color:rgba(255,51,102,.3);box-shadow:0 8px 36px rgba(255,51,102,.12)}
+
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kpi-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.k-g .kpi-icon{background:rgba(0,255,136,.1)}
+.k-p .kpi-icon{background:rgba(191,0,255,.1)}
+.k-b .kpi-icon{background:rgba(0,170,255,.1)}
+.k-c .kpi-icon{background:rgba(0,255,238,.1)}
+.k-o .kpi-icon{background:rgba(255,140,0,.1)}
+.k-r .kpi-icon{background:rgba(255,51,102,.1)}
+
+.kpi-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.bup  {background:rgba(0,255,136,.1);color:var(--ngreen)}
+.bdown{background:rgba(255,51,102,.1);color:var(--nred)}
+.bneu {background:rgba(255,255,255,.05);color:var(--muted)}
+
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kpi-value{font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.5px;line-height:1.1}
+.k-g .kpi-value{background:var(--gg); -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.k-p .kpi-value{background:var(--gp); -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.k-b .kpi-value{background:var(--gb); -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.k-c .kpi-value{background:var(--gc); -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.k-o .kpi-value{background:var(--go); -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.k-r .kpi-value{background:var(--gr); -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* ══════════════════════════════════════════════════
+   CHART CARDS
+══════════════════════════════════════════════════ */
+.g2  {display:grid;grid-template-columns:1fr 1fr;       gap:16px;margin-bottom:16px}
+.g3  {display:grid;grid-template-columns:1fr 1fr 1fr;   gap:16px;margin-bottom:16px}
+.g62 {display:grid;grid-template-columns:1.7fr 1fr;     gap:16px;margin-bottom:16px}
+.gfull{margin-bottom:16px}
+.split{display:flex;flex-direction:column;gap:16px}
+
+.ch{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;
+  transition:border-color .25s;position:relative;
+}
+.ch:hover{border-color:rgba(0,255,136,.12)}
+.ch-ttl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.ch-ins{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.ch-ins em{color:var(--ngreen);font-style:normal;font-weight:600}
+
+canvas{display:block;width:100%!important}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim)}
+
+/* ══════════════════════════════════════════════════
+   CATEGORY DONUT — interactive hint
+══════════════════════════════════════════════════ */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut-hint{font-size:11px;color:var(--muted);margin-top:8px;font-style:italic}
+.cat-legend{display:flex;flex-direction:column;gap:8px;flex:1;min-width:120px}
+.cat-li{
+  display:flex;align-items:center;gap:8px;font-size:12px;
+  cursor:pointer;padding:5px 10px;border-radius:8px;
+  border:1px solid transparent;transition:all .2s;color:var(--dim);
+}
+.cat-li:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.cat-li.selected{background:rgba(191,0,255,.1);border-color:rgba(191,0,255,.3);color:#e0a0ff}
+.cat-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.cat-pct{margin-left:auto;font-size:11px;color:var(--muted)}
+
+/* ══════════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════════ */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.tbl-hdr{padding:18px 24px 14px;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+thead th{
+  padding:10px 18px;font-size:10px;font-weight:700;letter-spacing:.9px;
+  text-transform:uppercase;color:var(--muted);text-align:right;
+  background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);
+}
+thead th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .15s}
+tbody tr:hover{background:rgba(0,255,136,.025)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:10px 18px;font-size:12px;text-align:right;color:var(--dim)}
+tbody td:first-child{text-align:left;color:var(--text);font-weight:500}
+.tr{color:#88aaff!important;font-weight:600}
+.tl{color:var(--ngreen)!important;font-weight:600}
+.tm{color:var(--norange)!important;font-weight:600}
+.tbr{display:flex;align-items:center;gap:7px;justify-content:flex-end}
+.tbar{height:3px;border-radius:2px;background:linear-gradient(to right,var(--ngreen),var(--npurple));min-width:2px}
+
+/* ══════════════════════════════════════════════════
+   TOOLTIP
+══════════════════════════════════════════════════ */
+#tip{
+  position:fixed;pointer-events:none;z-index:9999;
+  background:rgba(14,14,28,.97);border:1px solid rgba(0,255,136,.2);
+  border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);
+  box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 20px rgba(0,255,136,.05);
+  display:none;max-width:240px;line-height:1.7;
+}
+#tip strong{color:var(--ngreen);display:block;margin-bottom:1px;font-size:13px}
+
+/* ══════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════ */
+.footer{text-align:center;padding:20px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)}
+.footer span{color:var(--ngreen)}
+
+/* ══════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.kpi-card{animation:fadeUp .4s ease both}
+.kpi-card:nth-child(1){animation-delay:.04s}.kpi-card:nth-child(2){animation-delay:.08s}
+.kpi-card:nth-child(3){animation-delay:.12s}.kpi-card:nth-child(4){animation-delay:.16s}
+.kpi-card:nth-child(5){animation-delay:.20s}.kpi-card:nth-child(6){animation-delay:.24s}
+.ch{animation:fadeUp .5s ease both;animation-delay:.08s}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.main{padding:16px}.hero{padding:18px 20px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.g2,.g3,.g62{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="tip"></div>
+
+<!-- ═══════ HERO ═══════ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">● Dashboard Executivo</div>
+      <div class="hero-title"><span class="t1">Store_Estudo-IA</span></div>
+      <div class="hero-sub" id="hSub">Período completo · Nov/2024 → Abr/2026 · <strong>32.345 pedidos</strong></div>
+    </div>
+    <div class="pill-group">
+      <button class="pill" onclick="setPeriod(6,this)">6 meses</button>
+      <button class="pill" onclick="setPeriod(12,this)">12 meses</button>
+      <button class="pill active" onclick="setPeriod(0,this)">Tudo</button>
+    </div>
+  </div>
+</div>
+
+<!-- cat banner -->
+<div id="catBanner">
+  <span id="catBannerTxt">🔍 Filtrando por categoria: —</span>
+  <button class="btn-clear" onclick="clearCat()">✕ Limpar filtro</button>
+</div>
+
+<!-- ═══════ MAIN ═══════ -->
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="sec-lbl">Indicadores Principais</div>
+  <div class="kpi-grid">
+    <div class="kpi-card k-g">
+      <div class="kpi-top"><div class="kpi-icon">💰</div><div class="kpi-badge bneu" id="bg-rec">—</div></div>
+      <div class="kpi-label">Receita Total</div>
+      <div class="kpi-value" id="vl-rec">—</div>
+    </div>
+    <div class="kpi-card k-p">
+      <div class="kpi-top"><div class="kpi-icon">📈</div><div class="kpi-badge bneu" id="bg-luc">—</div></div>
+      <div class="kpi-label">Lucro Total</div>
+      <div class="kpi-value" id="vl-luc">—</div>
+    </div>
+    <div class="kpi-card k-o">
+      <div class="kpi-top"><div class="kpi-icon">🎯</div><div class="kpi-badge bneu" id="bg-mrg">—</div></div>
+      <div class="kpi-label">Margem de Lucro</div>
+      <div class="kpi-value" id="vl-mrg">—</div>
+    </div>
+    <div class="kpi-card k-b">
+      <div class="kpi-top"><div class="kpi-icon">🛒</div><div class="kpi-badge bneu" id="bg-tck">—</div></div>
+      <div class="kpi-label">Ticket Médio</div>
+      <div class="kpi-value" id="vl-tck">—</div>
+    </div>
+    <div class="kpi-card k-c">
+      <div class="kpi-top"><div class="kpi-icon">📦</div><div class="kpi-badge bneu" id="bg-ped">—</div></div>
+      <div class="kpi-label">Total de Pedidos</div>
+      <div class="kpi-value" id="vl-ped">—</div>
+    </div>
+    <div class="kpi-card k-r">
+      <div class="kpi-top"><div class="kpi-icon">⚡</div><div class="kpi-badge bneu" id="bg-cus">—</div></div>
+      <div class="kpi-label">Custo Total</div>
+      <div class="kpi-value" id="vl-cus">—</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Evolução + Margem -->
+  <div class="sec-lbl">Evolução Temporal</div>
+  <div class="g62">
+    <div class="ch">
+      <div class="ch-ttl">Receita vs. Lucro — Mensal</div>
+      <div class="ch-ins">Pico em <em>Dez/2025 (R$ 9,07 mi)</em>. Sazonalidade forte no 4º trimestre.</div>
+      <canvas id="cEv" height="230"></canvas>
+      <div class="legend">
+        <div class="li"><div class="ldot" style="background:#00ff88"></div>Receita</div>
+        <div class="li"><div class="ldot" style="background:#bf00ff"></div>Lucro</div>
+      </div>
+    </div>
+    <div class="ch">
+      <div class="ch-ttl">Margem de Lucro — Tendência</div>
+      <div class="ch-ins">Margem estável em <em>~19,4%</em>. Pressão em Nov/24 e Nov/25.</div>
+      <canvas id="cMg" height="230"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 2: Categoria (donut clicável) + Canal + Região -->
+  <div class="sec-lbl">Mix de Negócio &nbsp;<span style="font-size:10px;color:var(--npurple);font-weight:600;letter-spacing:0">← clique no donut para filtrar</span></div>
+  <div class="g3">
+
+    <!-- DONUT CLICÁVEL -->
+    <div class="ch">
+      <div class="ch-ttl">Receita por Categoria</div>
+      <div class="ch-ins"><em>Notebooks lideram</em> com 29,7%. Clique para filtrar o dashboard.</div>
+      <div class="donut-wrap">
+        <canvas id="cCat" width="180" height="180" style="flex-shrink:0;cursor:pointer"></canvas>
+        <div class="cat-legend" id="catLegend"></div>
+      </div>
+    </div>
+
+    <div class="ch">
+      <div class="ch-ttl">Receita por Canal</div>
+      <div class="ch-ins"><em>Site Próprio</em> representa 39,4% das vendas.</div>
+      <canvas id="cCan" height="220"></canvas>
+    </div>
+
+    <div class="ch">
+      <div class="ch-ttl">Receita por Região</div>
+      <div class="ch-ins"><em>Sudeste concentra 50,4%</em> da receita total.</div>
+      <canvas id="cReg" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 3: Produtos + Pagamento + Vendedores -->
+  <div class="sec-lbl">Produtos, Pagamento &amp; Equipe</div>
+  <div class="g62">
+    <div class="ch">
+      <div class="ch-ttl">Top Produtos por Receita</div>
+      <div class="ch-ins"><em>MacBook Air M2</em> lidera com R$ 16,6 mi (visão geral).</div>
+      <canvas id="cProd" height="340"></canvas>
+    </div>
+    <div class="split">
+      <div class="ch">
+        <div class="ch-ttl">Formas de Pagamento</div>
+        <div class="ch-ins"><em>Cartão de Crédito</em> = 55,3% das vendas.</div>
+        <canvas id="cPag" height="190"></canvas>
+      </div>
+      <div class="ch">
+        <div class="ch-ttl">Top 5 Vendedores</div>
+        <div class="ch-ins"><em>Diego Santos</em> lidera com R$ 9,98 mi.</div>
+        <canvas id="cVen" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div class="sec-lbl">Resumo Mensal Detalhado</div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr">
+      <div class="ch-ttl">Receita · Custo · Lucro · Margem — 18 meses</div>
+      <div class="ch-ins" style="margin-bottom:0">Visão completa mês a mês</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="text-align:left">Mês</th>
+        <th>Receita</th><th>Custo</th><th>Lucro</th>
+        <th>Margem</th><th>Pedidos</th><th>Ticket Médio</th>
+      </tr></thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+
+</div><!-- /main -->
+
+<footer class="footer">
+  Dados fictícios · TechStore Brasil · <span>32.345 transações · 18 meses</span> · Gerado em 03/06/2026
+</footer>
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════════════ -->
+<script>
+/* ══ DATA (ALL) ══════════════════════════════════════ */
+const ALL = {
+  monthly:[
+    {m:"2024-11",l:"Nov/24",Receita:7041796.70,Custo:5822870,Lucro:1218926.70,Pedidos:1975,Ticket:3565.47,Margem:17.31},
+    {m:"2024-12",l:"Dez/24",Receita:6886294.00,Custo:5545060,Lucro:1341234.00,Pedidos:1921,Ticket:3584.74,Margem:19.48},
+    {m:"2025-01",l:"Jan/25",Receita:3929375.80,Custo:3157320,Lucro:772055.80, Pedidos:1107,Ticket:3549.57,Margem:19.65},
+    {m:"2025-02",l:"Fev/25",Receita:4182189.25,Custo:3369770,Lucro:812419.25, Pedidos:1168,Ticket:3580.64,Margem:19.43},
+    {m:"2025-03",l:"Mar/25",Receita:5591389.00,Custo:4510070,Lucro:1081319.00,Pedidos:1584,Ticket:3529.92,Margem:19.34},
+    {m:"2025-04",l:"Abr/25",Receita:5328095.55,Custo:4286280,Lucro:1041815.55,Pedidos:1574,Ticket:3385.07,Margem:19.55},
+    {m:"2025-05",l:"Mai/25",Receita:7319049.40,Custo:5916570,Lucro:1402479.40,Pedidos:1955,Ticket:3743.76,Margem:19.16},
+    {m:"2025-06",l:"Jun/25",Receita:6348878.85,Custo:5123330,Lucro:1225548.85,Pedidos:1767,Ticket:3593.03,Margem:19.30},
+    {m:"2025-07",l:"Jul/25",Receita:6325362.50,Custo:5106560,Lucro:1218802.50,Pedidos:1749,Ticket:3616.56,Margem:19.27},
+    {m:"2025-08",l:"Ago/25",Receita:6866069.55,Custo:5537740,Lucro:1328329.55,Pedidos:1917,Ticket:3581.67,Margem:19.35},
+    {m:"2025-09",l:"Set/25",Receita:5909703.10,Custo:4747210,Lucro:1162493.10,Pedidos:1709,Ticket:3457.99,Margem:19.67},
+    {m:"2025-10",l:"Out/25",Receita:6463395.00,Custo:5199590,Lucro:1263805.00,Pedidos:1796,Ticket:3598.77,Margem:19.55},
+    {m:"2025-11",l:"Nov/25",Receita:9046534.30,Custo:7464790,Lucro:1581744.30,Pedidos:2679,Ticket:3376.83,Margem:17.48},
+    {m:"2025-12",l:"Dez/25",Receita:9065581.30,Custo:7290570,Lucro:1775011.30,Pedidos:2606,Ticket:3478.73,Margem:19.58},
+    {m:"2026-01",l:"Jan/26",Receita:5231994.55,Custo:4206540,Lucro:1025454.55,Pedidos:1494,Ticket:3502.00,Margem:19.60},
+    {m:"2026-02",l:"Fev/26",Receita:5326706.60,Custo:4281240,Lucro:1045466.60,Pedidos:1505,Ticket:3539.34,Margem:19.63},
+    {m:"2026-03",l:"Mar/26",Receita:6939042.95,Custo:5591430,Lucro:1347612.95,Pedidos:1935,Ticket:3586.07,Margem:19.42},
+    {m:"2026-04",l:"Abr/26",Receita:6793528.65,Custo:5459560,Lucro:1333968.65,Pedidos:1904,Ticket:3568.03,Margem:19.64},
+  ],
+  categoria:[
+    {k:"Notebooks",  v:34011660.25},{k:"Tablets",    v:30976487.00},
+    {k:"Smartphones",v:25944745.90},{k:"Monitores",  v:16538317.25},{k:"Acessórios",v:7123776.65},
+  ],
+  canal:[
+    {k:"Site Próprio",v:45150805.40},{k:"ML",v:28919496.00},{k:"Amazon",v:21113857.55},
+    {k:"Loja SP",v:11466524.30},{k:"Loja RJ",v:7944303.80},
+  ],
+  regiao:[
+    {k:"Sudeste",v:57714791.85},{k:"Sul",v:20904128.40},{k:"Nordeste",v:19018102.10},
+    {k:"Centro-Oeste",v:9339396.90},{k:"Norte",v:7618567.80},
+  ],
+  produtos:[
+    {k:'MacBook Air M2',v:16596855.70},{k:'iPad Air',v:14380360.20},
+    {k:'Galaxy Tab S9',v:11027948.80},{k:'iPhone 15',v:10191571.65},
+    {k:'Galaxy S24',v:7916393.55},{k:'Monitor Samsung 32"',v:6778006.95},
+    {k:'Dell Inspiron 15',v:6305198.00},{k:'Acer Aspire 5',v:5835455.85},
+    {k:'Xiaomi Pad 6',v:5568178.00},{k:'Monitor LG 27" 4K',v:5495960.70},
+  ],
+  pagamento:[
+    {k:"Cartão Crédito",v:63329631.70},{k:"PIX",v:28601678.70},
+    {k:"Boleto",v:13783734.90},{k:"Cartão Débito",v:8879941.75},
+  ],
+  vendedores:[
+    {k:"Diego Santos",v:9984159.70},{k:"Bruno Costa",v:9942197.00},
+    {k:"Carla Oliveira",v:9751385.45},{k:"Henrique Rocha",v:9679883.70},{k:"Ana Silva",v:9658137.95},
+  ],
+};
+
+/* ══ DATA BY CATEGORY ════════════════════════════════ */
+const CAT_DATA = {"Notebooks":{"monthly":[{"m":"2024-11","l":"Nov/24","Receita":2101035.25,"Custo":1758700,"Lucro":342335.25,"Pedidos":389,"Ticket":5401.12,"Margem":16.29},{"m":"2024-12","l":"Dez/24","Receita":2191698.75,"Custo":1795400,"Lucro":396298.75,"Pedidos":410,"Ticket":5345.61,"Margem":18.08},{"m":"2025-01","l":"Jan/25","Receita":1101276.65,"Custo":899900,"Lucro":201376.65,"Pedidos":213,"Ticket":5170.31,"Margem":18.29},{"m":"2025-02","l":"Fev/25","Receita":1343190.6,"Custo":1106600,"Lucro":236590.6,"Pedidos":247,"Ticket":5438.02,"Margem":17.61},{"m":"2025-03","l":"Mar/25","Receita":1684656.45,"Custo":1384500,"Lucro":300156.45,"Pedidos":320,"Ticket":5264.55,"Margem":17.82},{"m":"2025-04","l":"Abr/25","Receita":1546563.1,"Custo":1271900,"Lucro":274663.1,"Pedidos":308,"Ticket":5021.31,"Margem":17.76},{"m":"2025-05","l":"Mai/25","Receita":2312235.65,"Custo":1907200,"Lucro":405035.65,"Pedidos":413,"Ticket":5598.63,"Margem":17.52},{"m":"2025-06","l":"Jun/25","Receita":1929307.85,"Custo":1593200,"Lucro":336107.85,"Pedidos":341,"Ticket":5657.79,"Margem":17.42},{"m":"2025-07","l":"Jul/25","Receita":1822162.55,"Custo":1497900,"Lucro":324262.55,"Pedidos":350,"Ticket":5206.18,"Margem":17.8},{"m":"2025-08","l":"Ago/25","Receita":1926839.65,"Custo":1581800,"Lucro":345039.65,"Pedidos":373,"Ticket":5165.79,"Margem":17.91},{"m":"2025-09","l":"Set/25","Receita":1768579.35,"Custo":1453900,"Lucro":314679.35,"Pedidos":337,"Ticket":5248.01,"Margem":17.79},{"m":"2025-10","l":"Out/25","Receita":1840057.6,"Custo":1509900,"Lucro":330157.6,"Pedidos":343,"Ticket":5364.6,"Margem":17.94},{"m":"2025-11","l":"Nov/25","Receita":2734352.35,"Custo":2303900,"Lucro":430452.35,"Pedidos":552,"Ticket":4953.54,"Margem":15.74},{"m":"2025-12","l":"Dez/25","Receita":2586666.05,"Custo":2120700,"Lucro":465966.05,"Pedidos":502,"Ticket":5152.72,"Margem":18.01},{"m":"2026-01","l":"Jan/26","Receita":1681981.85,"Custo":1381800,"Lucro":300181.85,"Pedidos":307,"Ticket":5478.77,"Margem":17.85},{"m":"2026-02","l":"Fev/26","Receita":1511463.15,"Custo":1240000,"Lucro":271463.15,"Pedidos":281,"Ticket":5378.87,"Margem":17.96},{"m":"2026-03","l":"Mar/26","Receita":1973783.7,"Custo":1628200,"Lucro":345583.7,"Pedidos":377,"Ticket":5235.5,"Margem":17.51},{"m":"2026-04","l":"Abr/26","Receita":1955809.7,"Custo":1605800,"Lucro":350009.7,"Pedidos":379,"Ticket":5160.45,"Margem":17.9}],"canal":[{"k":"Site Próprio","v":13281539.1},{"k":"ML","v":8656389.7},{"k":"Amazon","v":6398157.8},{"k":"Loja SP","v":3387789.0},{"k":"Loja RJ","v":2287784.65}],"regiao":[{"k":"Sudeste","v":17561863.15},{"k":"Sul","v":5942769.1},{"k":"Nordeste","v":5468834.25},{"k":"Centro-Oeste","v":2899974.5},{"k":"Norte","v":2138219.25}],"produtos":[{"k":"MacBook Air M2","v":16596855.7},{"k":"Dell Inspiron 15","v":6305198.0},{"k":"Acer Aspire 5","v":5835455.85},{"k":"Lenovo IdeaPad 3","v":5274150.7}],"pagamento":[{"k":"Cartão Crédito","v":18709326.6},{"k":"PIX","v":8511876.4},{"k":"Boleto","v":4026532.1},{"k":"Cartão Débito","v":2763925.15}],"vendedores":[{"k":"Bruno Costa","v":3083069.5},{"k":"Felipe Almeida","v":3050735.0},{"k":"Ana Silva","v":2920414.15},{"k":"Diego Santos","v":2874803.0},{"k":"Eduarda Lima","v":2843637.45}]},"Tablets":{"monthly":[{"m":"2024-11","l":"Nov/24","Receita":1965663.15,"Custo":1649150,"Lucro":316513.15,"Pedidos":416,"Ticket":4725.15,"Margem":16.1},{"m":"2024-12","l":"Dez/24","Receita":1843768.9,"Custo":1498100,"Lucro":345668.9,"Pedidos":388,"Ticket":4751.98,"Margem":18.75},{"m":"2025-01","l":"Jan/25","Receita":1085724.85,"Custo":880500,"Lucro":205224.85,"Pedidos":223,"Ticket":4868.72,"Margem":18.9},{"m":"2025-02","l":"Fev/25","Receita":1217148.8,"Custo":992050,"Lucro":225098.8,"Pedidos":248,"Ticket":4907.86,"Margem":18.49},{"m":"2025-03","l":"Mar/25","Receita":1394495.05,"Custo":1134300,"Lucro":260195.05,"Pedidos":324,"Ticket":4304.0,"Margem":18.66},{"m":"2025-04","l":"Abr/25","Receita":1486945.25,"Custo":1205150,"Lucro":281795.25,"Pedidos":310,"Ticket":4796.6,"Margem":18.95},{"m":"2025-05","l":"Mai/25","Receita":1905962.65,"Custo":1559300,"Lucro":346662.65,"Pedidos":384,"Ticket":4963.44,"Margem":18.19},{"m":"2025-06","l":"Jun/25","Receita":1820655.2,"Custo":1483650,"Lucro":337005.2,"Pedidos":382,"Ticket":4766.11,"Margem":18.51},{"m":"2025-07","l":"Jul/25","Receita":1702562.25,"Custo":1394950,"Lucro":307612.25,"Pedidos":339,"Ticket":5022.31,"Margem":18.07},{"m":"2025-08","l":"Ago/25","Receita":1954368.0,"Custo":1600800,"Lucro":353568.0,"Pedidos":394,"Ticket":4960.32,"Margem":18.09},{"m":"2025-09","l":"Set/25","Receita":1476599.15,"Custo":1202100,"Lucro":274499.15,"Pedidos":304,"Ticket":4857.23,"Margem":18.59},{"m":"2025-10","l":"Out/25","Receita":1822092.2,"Custo":1478150,"Lucro":343942.2,"Pedidos":368,"Ticket":4951.34,"Margem":18.88},{"m":"2025-11","l":"Nov/25","Receita":2412002.0,"Custo":2008850,"Lucro":403152.0,"Pedidos":534,"Ticket":4516.86,"Margem":16.71},{"m":"2025-12","l":"Dez/25","Receita":2436793.45,"Custo":1975500,"Lucro":461293.45,"Pedidos":512,"Ticket":4759.36,"Margem":18.93},{"m":"2026-01","l":"Jan/26","Receita":1373407.15,"Custo":1117450,"Lucro":255957.15,"Pedidos":300,"Ticket":4578.02,"Margem":18.64},{"m":"2026-02","l":"Fev/26","Receita":1454491.3,"Custo":1183400,"Lucro":271091.3,"Pedidos":312,"Ticket":4661.83,"Margem":18.64},{"m":"2026-03","l":"Mar/26","Receita":1875738.75,"Custo":1534150,"Lucro":341588.75,"Pedidos":389,"Ticket":4821.95,"Margem":18.21},{"m":"2026-04","l":"Abr/26","Receita":1748068.9,"Custo":1420450,"Lucro":327618.9,"Pedidos":370,"Ticket":4724.51,"Margem":18.74}],"canal":[{"k":"Site Próprio","v":11991055.05},{"k":"ML","v":7883588.15},{"k":"Amazon","v":5801700.05},{"k":"Loja SP","v":3173477.5},{"k":"Loja RJ","v":2126666.25}],"regiao":[{"k":"Sudeste","v":15184396.4},{"k":"Sul","v":5856702.6},{"k":"Nordeste","v":5281087.2},{"k":"Centro-Oeste","v":2390000.25},{"k":"Norte","v":2264300.55}],"produtos":[{"k":"iPad Air","v":14380360.2},{"k":"Galaxy Tab S9","v":11027948.8},{"k":"Xiaomi Pad 6","v":5568178.0}],"pagamento":[{"k":"Cartão Crédito","v":17049751.6},{"k":"PIX","v":7990593.75},{"k":"Boleto","v":3618101.85},{"k":"Cartão Débito","v":2318039.8}],"vendedores":[{"k":"Isabela Martins","v":2786687.6},{"k":"Bruno Costa","v":2700165.65},{"k":"Ana Silva","v":2696856.75},{"k":"Carla Oliveira","v":2662139.9},{"k":"Karina Ferreira","v":2651516.2}]},"Monitores":{"monthly":[{"m":"2024-11","l":"Nov/24","Receita":1008745.9,"Custo":809750,"Lucro":198995.9,"Pedidos":403,"Ticket":2503.09,"Margem":19.73},{"m":"2024-12","l":"Dez/24","Receita":964149.55,"Custo":749850,"Lucro":214299.55,"Pedidos":373,"Ticket":2584.85,"Margem":22.23},{"m":"2025-01","l":"Jan/25","Receita":534756.65,"Custo":414050,"Lucro":120706.65,"Pedidos":207,"Ticket":2583.37,"Margem":22.57},{"m":"2025-02","l":"Fev/25","Receita":561816.45,"Custo":436750,"Lucro":125066.45,"Pedidos":223,"Ticket":2519.36,"Margem":22.26},{"m":"2025-03","l":"Mar/25","Receita":802445.3,"Custo":624950,"Lucro":177495.3,"Pedidos":310,"Ticket":2588.53,"Margem":22.12},{"m":"2025-04","l":"Abr/25","Receita":773503.9,"Custo":600250,"Lucro":173253.9,"Pedidos":308,"Ticket":2511.38,"Margem":22.4},{"m":"2025-05","l":"Mai/25","Receita":1045640.4,"Custo":811750,"Lucro":233890.4,"Pedidos":383,"Ticket":2730.13,"Margem":22.37},{"m":"2025-06","l":"Jun/25","Receita":901335.15,"Custo":704150,"Lucro":197185.15,"Pedidos":332,"Ticket":2714.86,"Margem":21.88},{"m":"2025-07","l":"Jul/25","Receita":960732.4,"Custo":749300,"Lucro":211432.4,"Pedidos":373,"Ticket":2575.69,"Margem":22.01},{"m":"2025-08","l":"Ago/25","Receita":972524.3,"Custo":757650,"Lucro":214874.3,"Pedidos":375,"Ticket":2593.4,"Margem":22.09},{"m":"2025-09","l":"Set/25","Receita":945192.95,"Custo":739250,"Lucro":205942.95,"Pedidos":357,"Ticket":2647.6,"Margem":21.79},{"m":"2025-10","l":"Out/25","Receita":893064.55,"Custo":696200,"Lucro":196864.55,"Pedidos":358,"Ticket":2494.59,"Margem":22.04},{"m":"2025-11","l":"Nov/25","Receita":1341058.25,"Custo":1068300,"Lucro":272758.25,"Pedidos":530,"Ticket":2530.3,"Margem":20.34},{"m":"2025-12","l":"Dez/25","Receita":1321258.05,"Custo":1035300,"Lucro":285958.05,"Pedidos":523,"Ticket":2526.31,"Margem":21.64},{"m":"2026-01","l":"Jan/26","Receita":831357.25,"Custo":647950,"Lucro":183407.25,"Pedidos":332,"Ticket":2504.09,"Margem":22.06},{"m":"2026-02","l":"Fev/26","Receita":805274.3,"Custo":629750,"Lucro":175524.3,"Pedidos":317,"Ticket":2540.3,"Margem":21.8},{"m":"2026-03","l":"Mar/26","Receita":968298.55,"Custo":753200,"Lucro":215098.55,"Pedidos":364,"Ticket":2660.16,"Margem":22.21},{"m":"2026-04","l":"Abr/26","Receita":907163.35,"Custo":703000,"Lucro":204163.35,"Pedidos":347,"Ticket":2614.3,"Margem":22.51}],"canal":[{"k":"Site Próprio","v":6666875.75},{"k":"ML","v":4064433.45},{"k":"Amazon","v":2900636.9},{"k":"Loja SP","v":1741485.4},{"k":"Loja RJ","v":1164885.75}],"regiao":[{"k":"Sudeste","v":8177033.85},{"k":"Sul","v":3048364.1},{"k":"Nordeste","v":2767361.7},{"k":"Centro-Oeste","v":1376710.85},{"k":"Norte","v":1168846.75}],"produtos":[{"k":"Monitor Samsung 32\"","v":6778006.95},{"k":"Monitor LG 27\" 4K","v":5495960.7},{"k":"Monitor Dell 24\"","v":4264349.6}],"pagamento":[{"k":"Cartão Crédito","v":9091419.4},{"k":"PIX","v":3954456.55},{"k":"Boleto","v":2120722.4},{"k":"Cartão Débito","v":1371718.9}],"vendedores":[{"k":"Diego Santos","v":1520976.4},{"k":"Carla Oliveira","v":1470166.8},{"k":"Gabriela Souza","v":1439061.65},{"k":"Bruno Costa","v":1394607.45},{"k":"Felipe Almeida","v":1385249.9}]},"Smartphones":{"monthly":[{"m":"2024-11","l":"Nov/24","Receita":1540288.3,"Custo":1295550,"Lucro":244738.3,"Pedidos":400,"Ticket":3850.72,"Margem":15.89},{"m":"2024-12","l":"Dez/24","Receita":1488418.6,"Custo":1220100,"Lucro":268318.6,"Pedidos":383,"Ticket":3886.21,"Margem":18.03},{"m":"2025-01","l":"Jan/25","Receita":958764.7,"Custo":787950,"Lucro":170814.7,"Pedidos":237,"Ticket":4045.42,"Margem":17.82},{"m":"2025-02","l":"Fev/25","Receita":834996.95,"Custo":678750,"Lucro":156246.95,"Pedidos":225,"Ticket":3711.1,"Margem":18.71},{"m":"2025-03","l":"Mar/25","Receita":1354281.6,"Custo":1111550,"Lucro":242731.6,"Pedidos":331,"Ticket":4091.49,"Margem":17.92},{"m":"2025-04","l":"Abr/25","Receita":1155250.0,"Custo":953300,"Lucro":201950.0,"Pedidos":291,"Ticket":3969.93,"Margem":17.48},{"m":"2025-05","l":"Mai/25","Receita":1645010.85,"Custo":1347550,"Lucro":297460.85,"Pedidos":404,"Ticket":4071.81,"Margem":18.08},{"m":"2025-06","l":"Jun/25","Receita":1293475.75,"Custo":1056400,"Lucro":237075.75,"Pedidos":326,"Ticket":3967.72,"Margem":18.33},{"m":"2025-07","l":"Jul/25","Receita":1492478.65,"Custo":1218950,"Lucro":273528.65,"Pedidos":365,"Ticket":4088.98,"Margem":18.33},{"m":"2025-08","l":"Ago/25","Receita":1590128.45,"Custo":1300200,"Lucro":289928.45,"Pedidos":393,"Ticket":4046.13,"Margem":18.23},{"m":"2025-09","l":"Set/25","Receita":1334856.75,"Custo":1083700,"Lucro":251156.75,"Pedidos":347,"Ticket":3846.85,"Margem":18.82},{"m":"2025-10","l":"Out/25","Receita":1482563.9,"Custo":1217800,"Lucro":264763.9,"Pedidos":349,"Ticket":4248.03,"Margem":17.86},{"m":"2025-11","l":"Nov/25","Receita":2016138.75,"Custo":1692800,"Lucro":323338.75,"Pedidos":534,"Ticket":3775.54,"Margem":16.04},{"m":"2025-12","l":"Dez/25","Receita":2134115.4,"Custo":1746350,"Lucro":387765.4,"Pedidos":548,"Ticket":3894.37,"Margem":18.17},{"m":"2026-01","l":"Jan/26","Receita":1016842.5,"Custo":828150,"Lucro":188692.5,"Pedidos":275,"Ticket":3697.61,"Margem":18.56},{"m":"2026-02","l":"Fev/26","Receita":1204469.9,"Custo":981350,"Lucro":223119.9,"Pedidos":292,"Ticket":4124.9,"Margem":18.52},{"m":"2026-03","l":"Mar/26","Receita":1671002.2,"Custo":1356050,"Lucro":314952.2,"Pedidos":418,"Ticket":3997.61,"Margem":18.85},{"m":"2026-04","l":"Abr/26","Receita":1731662.65,"Custo":1411450,"Lucro":320212.65,"Pedidos":420,"Ticket":4123.01,"Margem":18.49}],"canal":[{"k":"Site Próprio","v":10395217.25},{"k":"ML","v":6532644.9},{"k":"Amazon","v":4695658.05},{"k":"Loja SP","v":2461890.7},{"k":"Loja RJ","v":1859335.0}],"regiao":[{"k":"Sudeste","v":13139429.25},{"k":"Sul","v":4834751.9},{"k":"Nordeste","v":4318367.7},{"k":"Centro-Oeste","v":2086145.5},{"k":"Norte","v":1566051.55}],"produtos":[{"k":"iPhone 15","v":10191571.65},{"k":"Galaxy S24","v":7916393.55},{"k":"Motorola Edge 50","v":4507821.15},{"k":"Xiaomi Redmi Note 13","v":3328959.55}],"pagamento":[{"k":"Cartão Crédito","v":14531802.5},{"k":"PIX","v":6458065.8},{"k":"Boleto","v":3116100.55},{"k":"Cartão Débito","v":1838777.05}],"vendedores":[{"k":"Diego Santos","v":2411754.25},{"k":"Carla Oliveira","v":2253778.25},{"k":"Henrique Rocha","v":2238921.55},{"k":"Karina Ferreira","v":2198661.75},{"k":"Bruno Costa","v":2180725.3}]},"Acessórios":{"monthly":[{"m":"2024-11","l":"Nov/24","Receita":426064.1,"Custo":309720,"Lucro":116344.1,"Pedidos":367,"Ticket":1160.94,"Margem":27.31},{"m":"2024-12","l":"Dez/24","Receita":398258.2,"Custo":281610,"Lucro":116648.2,"Pedidos":367,"Ticket":1085.17,"Margem":29.29},{"m":"2025-01","l":"Jan/25","Receita":248852.95,"Custo":174920,"Lucro":73932.95,"Pedidos":227,"Ticket":1096.27,"Margem":29.71},{"m":"2025-02","l":"Fev/25","Receita":225036.45,"Custo":155620,"Lucro":69416.45,"Pedidos":225,"Ticket":1000.16,"Margem":30.85},{"m":"2025-03","l":"Mar/25","Receita":355510.6,"Custo":254770,"Lucro":100740.6,"Pedidos":299,"Ticket":1189.0,"Margem":28.34},{"m":"2025-04","l":"Abr/25","Receita":365833.3,"Custo":255680,"Lucro":110153.3,"Pedidos":357,"Ticket":1024.74,"Margem":30.11},{"m":"2025-05","l":"Mai/25","Receita":410199.85,"Custo":290770,"Lucro":119429.85,"Pedidos":371,"Ticket":1105.66,"Margem":29.12},{"m":"2025-06","l":"Jun/25","Receita":404104.9,"Custo":285930,"Lucro":118174.9,"Pedidos":386,"Ticket":1046.9,"Margem":29.24},{"m":"2025-07","l":"Jul/25","Receita":347426.65,"Custo":245460,"Lucro":101966.65,"Pedidos":322,"Ticket":1078.96,"Margem":29.35},{"m":"2025-08","l":"Ago/25","Receita":422209.15,"Custo":297290,"Lucro":124919.15,"Pedidos":382,"Ticket":1105.26,"Margem":29.59},{"m":"2025-09","l":"Set/25","Receita":384474.9,"Custo":268260,"Lucro":116214.9,"Pedidos":364,"Ticket":1056.25,"Margem":30.23},{"m":"2025-10","l":"Out/25","Receita":425616.75,"Custo":297540,"Lucro":128076.75,"Pedidos":378,"Ticket":1125.97,"Margem":30.09},{"m":"2025-11","l":"Nov/25","Receita":542982.95,"Custo":390940,"Lucro":152042.95,"Pedidos":529,"Ticket":1026.43,"Margem":28.0},{"m":"2025-12","l":"Dez/25","Receita":586748.35,"Custo":412720,"Lucro":174028.35,"Pedidos":521,"Ticket":1126.2,"Margem":29.66},{"m":"2026-01","l":"Jan/26","Receita":328405.8,"Custo":231190,"Lucro":97215.8,"Pedidos":280,"Ticket":1172.88,"Margem":29.6},{"m":"2026-02","l":"Fev/26","Receita":351007.95,"Custo":246740,"Lucro":104267.95,"Pedidos":303,"Ticket":1158.44,"Margem":29.71},{"m":"2026-03","l":"Mar/26","Receita":450219.75,"Custo":319830,"Lucro":130389.75,"Pedidos":387,"Ticket":1163.36,"Margem":28.96},{"m":"2026-04","l":"Abr/26","Receita":450824.05,"Custo":318860,"Lucro":131964.05,"Pedidos":388,"Ticket":1161.92,"Margem":29.27}],"canal":[{"k":"Site Próprio","v":2816118.25},{"k":"ML","v":1782439.8},{"k":"Amazon","v":1317704.75},{"k":"Loja SP","v":701881.7},{"k":"Loja RJ","v":505632.15}],"regiao":[{"k":"Sudeste","v":3652069.2},{"k":"Sul","v":1221540.7},{"k":"Nordeste","v":1182451.25},{"k":"Centro-Oeste","v":586565.8},{"k":"Norte","v":481149.7}],"produtos":[{"k":"Fone Sony WH-1000XM5","v":3678403.05},{"k":"Teclado Mecânico HyperX","v":1216677.25},{"k":"Mouse Logitech MX Master","v":854832.9},{"k":"Webcam Logitech C920","v":731658.75},{"k":"Headset HyperX Cloud","v":642204.7}],"pagamento":[{"k":"Cartão Crédito","v":3947331.6},{"k":"PIX","v":1686686.2},{"k":"Boleto","v":902278.0},{"k":"Cartão Débito","v":587480.85}],"vendedores":[{"k":"Karina Ferreira","v":652465.95},{"k":"Eduarda Lima","v":629312.95},{"k":"Henrique Rocha","v":626412.5},{"k":"João Pereira","v":620739.65},{"k":"Isabela Martins","v":616719.85}]}};
+
+/* ══ NEON PALETTE ════════════════════════════════════ */
+const NPAL = ['#00ff88','#bf00ff','#00aaff','#00ffee','#ff8c00','#ff3366','#ffe600','#ff66cc','#66ff44','#ff9944'];
+
+/* ══ STATE ═══════════════════════════════════════════ */
+let activeCat = null;   // selected category
+let periodN   = 0;      // 0=all, 6, 12
+
+/* ══ UTILS ═══════════════════════════════════════════ */
+const BRL  = v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const BRLM = v=>'R$ '+(v/1e6).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' mi';
+const BRLK = v=>'R$ '+(v/1e3).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' k';
+const PCT  = v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const NUM  = v=>v.toLocaleString('pt-BR');
+const SUM  = (a,k)=>a.reduce((s,r)=>s+r[k],0);
+
+/* ══ TOOLTIP ══════════════════════════════════════════ */
+const tip=document.getElementById('tip');
+function showTip(e,title,body){
+  tip.innerHTML=`<strong>${title}</strong>${body}`;
+  tip.style.display='block'; mvTip(e);
+}
+function mvTip(e){
+  let x=e.clientX+14, y=e.clientY-10;
+  if(x+250>window.innerWidth) x=e.clientX-250;
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+}
+function hideTip(){tip.style.display='none'}
+
+/* ══ KPIs ═════════════════════════════════════════════ */
+function mkBadge(id,cur,prv,isP=false){
+  const el=document.getElementById(id);
+  if(!prv){el.className='kpi-badge bneu';el.textContent='—';return}
+  const d=cur-prv, pct=(d/Math.abs(prv)*100);
+  const up=d>0, cls=up?'bup':'bdown', arrow=up?'▲':'▼';
+  const txt=isP?(d>0?'+':'')+d.toFixed(2)+' p.p.':(pct>0?'+':'')+pct.toFixed(1)+'%';
+  el.className='kpi-badge '+cls; el.textContent=arrow+' '+txt;
+}
+function updateKPIs(data){
+  const h=Math.floor(data.length/2);
+  const a=data.slice(0,h), b=data.slice(h);
+  const rA=SUM(a,'Receita'),rB=SUM(b,'Receita');
+  const lA=SUM(a,'Lucro'),  lB=SUM(b,'Lucro');
+  const pA=SUM(a,'Pedidos'),pB=SUM(b,'Pedidos');
+  const cA=SUM(a,'Custo'),  cB=SUM(b,'Custo');
+  const R=SUM(data,'Receita'),L=SUM(data,'Lucro'),P=SUM(data,'Pedidos'),C=SUM(data,'Custo');
+  document.getElementById('vl-rec').textContent=BRLM(R);
+  document.getElementById('vl-luc').textContent=BRLM(L);
+  document.getElementById('vl-mrg').textContent=PCT(L/R*100);
+  document.getElementById('vl-tck').textContent=BRL(R/P);
+  document.getElementById('vl-ped').textContent=NUM(P);
+  document.getElementById('vl-cus').textContent=BRLM(C);
+  mkBadge('bg-rec',rB,rA); mkBadge('bg-luc',lB,lA);
+  mkBadge('bg-mrg',lB/rB*100,lA/rA*100,true); mkBadge('bg-tck',rB/pB,rA/pA);
+  mkBadge('bg-ped',pB,pA); mkBadge('bg-cus',cB,cA);
+}
+
+/* ══ CANVAS HELPERS ═══════════════════════════════════ */
+function prep(id){
+  const c=document.getElementById(id);
+  c.width=c.parentElement.clientWidth-44;
+  return{c,ctx:c.getContext('2d'),W:c.width,H:c.height};
+}
+function gridLines(ctx,p,iW,iH,maxV,fmtFn){
+  [0,.25,.5,.75,1].forEach(f=>{
+    const y=p.t+iH*(1-f);
+    ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;ctx.setLineDash([3,5]);
+    ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+iW,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#3a3a60';ctx.font='10px Inter,sans-serif';ctx.textAlign='right';
+    ctx.fillText(fmtFn(maxV*f),p.l-6,y+4);
+  });
+}
+
+/* Dual line (Receita + Lucro) */
+function drawDual(id,labels,s1,s2){
+  const{c,ctx,W,H}=prep(id); ctx.clearRect(0,0,W,H);
+  const p={t:20,r:22,b:36,l:80},iW=W-p.l-p.r,iH=H-p.t-p.b;
+  const max1=Math.max(...s1)*1.15||1, max2=Math.max(...s2)*1.15||1;
+  gridLines(ctx,p,iW,iH,max1,BRLK);
+  [0,.25,.5,.75,1].forEach(f=>{
+    const y=p.t+iH*(1-f);
+    ctx.fillStyle='rgba(191,0,255,.5)';ctx.font='10px Inter,sans-serif';ctx.textAlign='left';
+    ctx.fillText(BRLK(max2*f),W-p.r+4,y+4);
+  });
+  function series(data,maxV,col){
+    const step=iW/(labels.length-1||1);
+    const pts=data.map((v,i)=>[p.l+i*step,p.t+iH*(1-v/maxV)]);
+    const g=ctx.createLinearGradient(0,p.t,0,p.t+iH);
+    g.addColorStop(0,col+'30');g.addColorStop(1,col+'03');
+    ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+    ctx.lineTo(pts[pts.length-1][0],p.t+iH);ctx.lineTo(p.l,p.t+iH);
+    ctx.closePath();ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2.5;
+    pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+    pts.forEach(([x,y])=>{
+      ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.fill();ctx.strokeStyle='#09090f';ctx.lineWidth=1.5;ctx.stroke();
+    });
+    return pts;
+  }
+  series(s1,max1,'#00ff88'); series(s2,max2,'#bf00ff');
+  ctx.fillStyle='#3a3a60';ctx.font='10px Inter,sans-serif';ctx.textAlign='center';
+  const step=iW/(labels.length-1||1);
+  labels.forEach((l,i)=>ctx.fillText(l,p.l+i*step,H-p.b+14));
+  c.onmousemove=e=>{
+    const r=c.getBoundingClientRect(),idx=Math.round((e.clientX-r.left-p.l)/step);
+    if(idx>=0&&idx<labels.length)
+      showTip(e,labels[idx],
+        `<br>Receita: <b style="color:#00ff88">${BRLM(s1[idx])}</b>`+
+        `<br>Lucro: <b style="color:#bf00ff">${BRLM(s2[idx])}</b>`);
+  };
+  c.onmouseleave=hideTip;
+}
+
+/* Area (margem) */
+function drawArea(id,labels,vals){
+  const{c,ctx,W,H}=prep(id);ctx.clearRect(0,0,W,H);
+  const p={t:20,r:20,b:36,l:52},iW=W-p.l-p.r,iH=H-p.t-p.b;
+  const minV=Math.min(...vals)*.95,maxV=Math.max(...vals)*1.05,rng=maxV-minV||1;
+  [0,.25,.5,.75,1].forEach(f=>{
+    const y=p.t+iH*(1-f);
+    ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;ctx.setLineDash([3,5]);
+    ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+iW,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#3a3a60';ctx.font='10px Inter,sans-serif';ctx.textAlign='right';
+    ctx.fillText((minV+rng*f).toFixed(1)+'%',p.l-4,y+4);
+  });
+  const step=iW/(labels.length-1||1);
+  const pts=vals.map((v,i)=>[p.l+i*step,p.t+iH*(1-(v-minV)/rng)]);
+  const col='#ff8c00';
+  const g=ctx.createLinearGradient(0,p.t,0,p.t+iH);
+  g.addColorStop(0,col+'50');g.addColorStop(1,col+'02');
+  ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+  ctx.lineTo(pts[pts.length-1][0],p.t+iH);ctx.lineTo(p.l,p.t+iH);
+  ctx.closePath();ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2.5;
+  pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+  pts.forEach(([x,y])=>{
+    ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle=col;ctx.fill();ctx.strokeStyle='#09090f';ctx.lineWidth=1.5;ctx.stroke();
+  });
+  ctx.fillStyle='#3a3a60';ctx.font='10px Inter,sans-serif';ctx.textAlign='center';
+  labels.forEach((l,i)=>ctx.fillText(l,p.l+i*step,H-p.b+14));
+  c.onmousemove=e=>{
+    const r=c.getBoundingClientRect(),idx=Math.round((e.clientX-r.left-p.l)/step);
+    if(idx>=0&&idx<labels.length)
+      showTip(e,labels[idx],`<br>Margem: <b style="color:${col}">${PCT(vals[idx])}</b>`);
+  };
+  c.onmouseleave=hideTip;
+}
+
+/* H-bar */
+function drawHBar(id,labels,vals){
+  const c=document.getElementById(id);
+  c.width=c.parentElement.clientWidth-44;
+  c.height=labels.length*36+20;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  const W=c.width,p={t:10,r:20,b:10,l:170},maxV=Math.max(...vals)||1;
+  labels.forEach((lbl,i)=>{
+    const y=p.t+i*36,bW=Math.max((W-p.l-p.r)*(vals[i]/maxV),4);
+    const col=NPAL[i%NPAL.length];
+    const g=ctx.createLinearGradient(p.l,0,p.l+bW,0);
+    g.addColorStop(0,col+'cc');g.addColorStop(1,col+'33');
+    ctx.fillStyle=g;
+    if(ctx.roundRect)ctx.roundRect(p.l,y+6,bW,24,5);
+    else ctx.rect(p.l,y+6,bW,24);
+    ctx.fill();
+    // glow
+    ctx.shadowColor=col;ctx.shadowBlur=8;
+    ctx.fillStyle=g;
+    if(ctx.roundRect)ctx.roundRect(p.l,y+6,bW,24,5);
+    else ctx.rect(p.l,y+6,bW,24);
+    ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#6060a0';ctx.font='11px Inter,sans-serif';ctx.textAlign='right';
+    ctx.fillText(lbl.slice(0,22),p.l-8,y+22);
+    ctx.fillStyle='#d0d0f0';ctx.textAlign='left';
+    ctx.fillText(BRLM(vals[i]),p.l+bW+8,y+22);
+  });
+  c.onmousemove=e=>{
+    const r=c.getBoundingClientRect(),my=e.clientY-r.top,i=Math.floor((my-p.t)/36);
+    if(i>=0&&i<labels.length)
+      showTip(e,labels[i],`<br>Receita: <b style="color:${NPAL[i%NPAL.length]}">${BRLM(vals[i])}</b>`);
+  };
+  c.onmouseleave=hideTip;
+}
+
+/* V-bar */
+function drawVBar(id,labels,vals,h=220){
+  const c=document.getElementById(id);
+  c.width=c.parentElement.clientWidth-44;c.height=h;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  const W=c.width,H=c.height,p={t:20,r:20,b:44,l:80};
+  const iW=W-p.l-p.r,iH=H-p.t-p.b,maxV=Math.max(...vals)*1.15||1;
+  gridLines(ctx,p,iW,iH,maxV,BRLK);
+  const gap=iW/labels.length,bW=Math.min(54,gap*.65);
+  labels.forEach((lbl,i)=>{
+    const x=p.l+i*gap+gap/2-bW/2,bH=iH*(vals[i]/maxV);
+    const col=NPAL[i%NPAL.length];
+    const g=ctx.createLinearGradient(0,p.t+iH-bH,0,p.t+iH);
+    g.addColorStop(0,col);g.addColorStop(1,col+'33');
+    ctx.shadowColor=col;ctx.shadowBlur=10;
+    ctx.fillStyle=g;
+    if(ctx.roundRect)ctx.roundRect(x,p.t+iH-bH,bW,bH,5);
+    else ctx.rect(x,p.t+iH-bH,bW,bH);
+    ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#5050a0';ctx.font='10px Inter,sans-serif';ctx.textAlign='center';
+    ctx.fillText(lbl.slice(0,12),x+bW/2,H-p.b+14);
+  });
+  c.onmousemove=e=>{
+    const r=c.getBoundingClientRect(),gap2=iW/labels.length;
+    const i=Math.floor((e.clientX-r.left-p.l)/gap2);
+    if(i>=0&&i<labels.length)
+      showTip(e,labels[i],`<br>Receita: <b style="color:${NPAL[i%NPAL.length]}">${BRLM(vals[i])}</b>`);
+  };
+  c.onmouseleave=hideTip;
+}
+
+/* ══ CATEGORY DONUT (CLICKABLE) ═════════════════════════ */
+const CAT_NAMES = ALL.categoria.map(r=>r.k);
+const CAT_TOTAL = ALL.categoria.map(r=>r.v);
+const CAT_SLICES = []; // {start,end}
+
+function buildCatDonut(){
+  const c=document.getElementById('cCat');
+  const sz=180; c.width=sz;c.height=sz;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,sz,sz);
+  const cx=sz/2,cy=sz/2,R=sz/2-8,r=R*.58;
+  const total=CAT_TOTAL.reduce((a,b)=>a+b,0)||1;
+  CAT_SLICES.length=0;
+  let angle=-Math.PI/2;
+  CAT_TOTAL.forEach((v,i)=>{
+    const sweep=(v/total)*Math.PI*2;
+    const isActive=activeCat===null||activeCat===CAT_NAMES[i];
+    const col=NPAL[i%NPAL.length];
+    const outerR=isActive&&activeCat===CAT_NAMES[i] ? R+5 : R;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,outerR,angle,angle+sweep);
+    ctx.closePath();
+    ctx.fillStyle=isActive?col:col+'44';
+    if(isActive){ctx.shadowColor=col;ctx.shadowBlur=activeCat===CAT_NAMES[i]?20:0}
+    ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='#09090f';ctx.lineWidth=2;ctx.stroke();
+    CAT_SLICES.push({start:angle,end:angle+sweep,name:CAT_NAMES[i]});
+    angle+=sweep;
+  });
+  // hole
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='#111120';ctx.fill();
+  // center text
+  ctx.textAlign='center';ctx.fillStyle='#c0c0e0';
+  if(activeCat){
+    ctx.font='bold 11px Inter,sans-serif';ctx.fillText(activeCat,cx,cy-4);
+    const catV=CAT_TOTAL[CAT_NAMES.indexOf(activeCat)];
+    ctx.font='bold 12px Inter,sans-serif';ctx.fillStyle='#00ff88';
+    ctx.fillText(BRLM(catV),cx,cy+12);
+  } else {
+    ctx.font='11px Inter,sans-serif';ctx.fillText('Total',cx,cy-4);
+    ctx.font='bold 12px Inter,sans-serif';ctx.fillStyle='#00ff88';
+    ctx.fillText(BRLM(total),cx,cy+12);
+  }
+
+  // legend
+  const legend=document.getElementById('catLegend');
+  legend.innerHTML='';
+  const totAll=CAT_TOTAL.reduce((a,b)=>a+b,0)||1;
+  CAT_NAMES.forEach((name,i)=>{
+    const pct=(CAT_TOTAL[i]/totAll*100).toFixed(1);
+    const div=document.createElement('div');
+    div.className='cat-li'+(activeCat===name?' selected':'');
+    div.innerHTML=`<div class="cat-swatch" style="background:${NPAL[i%NPAL.length]}"></div><span>${name}</span><span class="cat-pct">${pct}%</span>`;
+    div.onclick=()=>toggleCat(name);
+    legend.appendChild(div);
+  });
+
+  // Helpers com escala correta (canvas interno 180px vs tamanho CSS real)
+  function getScaledPos(e){
+    const rect=c.getBoundingClientRect();
+    const scaleX=sz/rect.width, scaleY=sz/rect.height;
+    const dx=(e.clientX-rect.left)*scaleX-cx;
+    const dy=(e.clientY-rect.top)*scaleY-cy;
+    return {dx,dy,dist:Math.sqrt(dx*dx+dy*dy)};
+  }
+  function findSlice(dx,dy){
+    let a=Math.atan2(dy,dx);
+    if(a<-Math.PI/2) a+=2*Math.PI;
+    return CAT_SLICES.find(s=>a>=s.start&&a<s.end);
+  }
+
+  c.onmousemove=e=>{
+    const {dx,dy,dist}=getScaledPos(e);
+    if(dist>r&&dist<R+10){
+      const sl=findSlice(dx,dy);
+      if(sl){
+        const idx=CAT_NAMES.indexOf(sl.name);
+        showTip(e,sl.name,
+          `<br>Receita: <b style="color:${NPAL[idx%NPAL.length]}">${BRLM(CAT_TOTAL[idx])}</b>`+
+          `<br>Part.: <b>${(CAT_TOTAL[idx]/totAll*100).toFixed(1)}%</b>`+
+          `<br><span style="color:var(--muted);font-size:11px">Clique para filtrar</span>`);
+      }
+    } else hideTip();
+  };
+  c.onmouseleave=hideTip;
+  c.onclick=e=>{
+    const {dx,dy,dist}=getScaledPos(e);
+    if(dist>r&&dist<R+10){
+      const sl=findSlice(dx,dy);
+      if(sl) toggleCat(sl.name);
+    }
+  };
+  c.style.cursor='pointer';
+}
+
+function toggleCat(name){
+  activeCat = activeCat===name ? null : name;
+  renderAll();
+}
+function clearCat(){activeCat=null;renderAll()}
+
+/* ══ PERIOD FILTER ═══════════════════════════════════ */
+function setPeriod(n,el){
+  periodN=n;
+  document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderAll();
+}
+
+/* ══ RENDER ALL ══════════════════════════════════════ */
+const MESES={"2024-11":"Nov/2024","2024-12":"Dez/2024","2025-01":"Jan/2025","2025-02":"Fev/2025","2025-03":"Mar/2025","2025-04":"Abr/2025","2025-05":"Mai/2025","2025-06":"Jun/2025","2025-07":"Jul/2025","2025-08":"Ago/2025","2025-09":"Set/2025","2025-10":"Out/2025","2025-11":"Nov/2025","2025-12":"Dez/2025","2026-01":"Jan/2026","2026-02":"Fev/2026","2026-03":"Mar/2026","2026-04":"Abr/2026"};
+
+function renderAll(){
+  // Pick data source
+  const src = activeCat ? CAT_DATA[activeCat] : ALL;
+
+  // Monthly with period slice
+  const monthly = periodN===0 ? src.monthly : src.monthly.slice(-periodN);
+
+  // Banner
+  const banner=document.getElementById('catBanner');
+  if(activeCat){
+    banner.classList.add('show');
+    document.getElementById('catBannerTxt').textContent=`🔍 Filtrando por categoria: ${activeCat}`;
+  } else banner.classList.remove('show');
+
+  // Hero sub
+  const fl=monthly[0]?.l||'', ll=monthly[monthly.length-1]?.l||'';
+  document.getElementById('hSub').innerHTML=
+    `${fl} → ${ll} · <strong>${NUM(SUM(monthly,'Pedidos'))} pedidos</strong>`+
+    (activeCat?` · <span style="color:var(--npurple)">${activeCat}</span>`:'');
+
+  // KPIs
+  updateKPIs(monthly);
+
+  // Temporal
+  drawDual('cEv', monthly.map(r=>r.l), monthly.map(r=>r.Receita), monthly.map(r=>r.Lucro));
+  drawArea('cMg', monthly.map(r=>r.l), monthly.map(r=>r.Margem));
+
+  // Donut categoria (always full data, just highlight)
+  buildCatDonut();
+
+  // Mix charts
+  drawHBar('cCan', src.canal.map(r=>r.k), src.canal.map(r=>r.v));
+  drawVBar('cReg', src.regiao.map(r=>r.k), src.regiao.map(r=>r.v), 220);
+
+  // Produtos / pagamento / vendedores
+  drawHBar('cProd', src.produtos.map(r=>r.k), src.produtos.map(r=>r.v));
+  drawDonut2('cPag', src.pagamento.map(r=>r.k), src.pagamento.map(r=>r.v));
+  drawVBar('cVen', src.vendedores.map(r=>r.k), src.vendedores.map(r=>r.v), 150);
+
+  // Table
+  buildTable(monthly);
+}
+
+/* donut pagamento */
+function drawDonut2(id,labels,vals){
+  const c=document.getElementById(id);
+  const sz=Math.min(c.parentElement.clientWidth-44,190);
+  c.width=sz;c.height=sz;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,sz,sz);
+  const cx=sz/2,cy=sz/2,R=sz/2-8,r=R*.55;
+  const total=vals.reduce((a,b)=>a+b,0)||1;
+  const slices=[];
+  let angle=-Math.PI/2;
+  vals.forEach((v,i)=>{
+    const sweep=(v/total)*Math.PI*2;
+    const col=NPAL[i%NPAL.length];
+    ctx.shadowColor=col;ctx.shadowBlur=8;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,angle,angle+sweep);
+    ctx.closePath();ctx.fillStyle=col;ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='#09090f';ctx.lineWidth=2;ctx.stroke();
+    slices.push({start:angle,end:angle+sweep,i});
+    angle+=sweep;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#111120';ctx.fill();
+  ctx.textAlign='center';ctx.fillStyle='#c0c0e0';ctx.font='10px Inter,sans-serif';
+  ctx.fillText('Total',cx,cy-3);
+  ctx.fillStyle='#00ff88';ctx.font='bold 11px Inter,sans-serif';
+  ctx.fillText(BRLM(total),cx,cy+12);
+  c.onmousemove=e=>{
+    const rect=c.getBoundingClientRect();
+    const dx=e.clientX-rect.left-cx,dy=e.clientY-rect.top-cy;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>r&&dist<R){
+      let a=Math.atan2(dy,dx);if(a<-Math.PI/2)a+=2*Math.PI;
+      const sl=slices.find(s=>a>=s.start&&a<s.end);
+      if(sl) showTip(e,labels[sl.i],
+        `<br>Receita: <b style="color:${NPAL[sl.i%NPAL.length]}">${BRLM(vals[sl.i])}</b>`+
+        `<br>Part.: <b>${(vals[sl.i]/total*100).toFixed(1)}%</b>`);
+    } else hideTip();
+  };
+  c.onmouseleave=hideTip;
+}
+
+/* table */
+function buildTable(data){
+  const maxR=Math.max(...data.map(r=>r.Receita));
+  document.getElementById('tBody').innerHTML=data.map(r=>{
+    const pct=r.Receita/maxR*100;
+    return`<tr>
+      <td>${MESES[r.m]||r.m}</td>
+      <td class="tr"><div class="tbr"><div class="tbar" style="width:${pct.toFixed(0)}px"></div>${BRLM(r.Receita)}</div></td>
+      <td>${BRLM(r.Custo)}</td>
+      <td class="tl">${BRLM(r.Lucro)}</td>
+      <td class="tm">${PCT(r.Margem)}</td>
+      <td>${NUM(r.Pedidos)}</td>
+      <td>${BRL(r.Ticket)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══ INIT ══════════════════════════════════════════════ */
+window.addEventListener('load',()=>{
+  renderAll();
+  let t;
+  window.addEventListener('resize',()=>{
+    clearTimeout(t);t=setTimeout(renderAll,200);
+  });
+});
+</script>
+</body>
+</html>
